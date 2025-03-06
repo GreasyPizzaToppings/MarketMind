@@ -1,0 +1,16 @@
+.mm-viewed {
+  opacity: 0.6;
+  position: relative;
+}
+
+.mm-viewed::after {
+  content: '✓';
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+}

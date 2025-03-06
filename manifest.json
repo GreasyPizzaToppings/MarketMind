@@ -1,0 +1,19 @@
+{
+  "manifest_version": 3,
+  "name": "MarketMind",
+  "version": "1.0",
+  "description": "Enhanced Facebook Marketplace browsing experience with viewed item tracking",
+  "permissions": [
+    "storage",
+    "activeTab"
+  ],
+  "content_scripts": [{
+    "matches": ["*://*.facebook.com/marketplace/*"],
+    "js": ["content.js"],
+    "css": ["styles.css"]
+  }],
+  "icons": {
+    "48": "icon48.png",
+    "128": "icon128.png"
+  }
+} 
