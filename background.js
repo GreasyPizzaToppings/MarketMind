@@ -3,10 +3,13 @@ chrome.runtime.onInstalled.addListener(() => {
   console.log('MarketMind installed')
 })
 
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => 
+  {
   if (message.action === 'updateStats') {
-    // forward to any open stats pages
-    chrome.runtime.sendMessage(message).catch(() => {});
+    // Update storage with latest stats
+    chrome.storage.local.set({
+      currentStats: message
+    }).catch(console.error);
   }
   return true;
 }); 

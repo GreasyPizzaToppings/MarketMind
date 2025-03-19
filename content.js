@@ -212,16 +212,25 @@ class MarketMind {
   }
 
   updateStats() {
-    chrome.runtime.sendMessage({
+    const stats = {
       action: 'updateStats', 
       stats: this.stats,
-      viewedCount: this.viewedListings.size
-    }).catch(err => {
+      viewedCount: this.viewedListings.size,
+      timestamp: Date.now()
+    };
+
+    // Update storage first
+    chrome.storage.local.set({ currentStats: stats }).catch(err => {
+      this.log('Stats storage error:', err);
+    });
+
+    // Then send message
+    chrome.runtime.sendMessage(stats).catch(err => {
       // Only log unique errors
       if (!err.message.includes('message channel closed')) {
-        this.log('Stats update error:', err)
+        this.log('Stats update error:', err);
       }
-    })
+    });
   }
 
   addIframePanel() {
