@@ -1,0 +1,18 @@
+features:
+- mark unread
+- page to manage extension's features and settings
+- can rename listings
+- add overlaid highlight/note to listing + automatic note suggestions (e.g. find size)
+- search: words title must and must not include
+- watch sellers. get notified with new listings
+
+- easier debugging
+
+bugs:
+- right click then left click does not mark as viewed
+- somehow some items got removed from list.
+- some items not showing as viewed when they should be. e.g. cue on handpainted converse listing
+
+
+- make sure it works when new items load from scrolling
+- make sure it works on regular facebook.com search for items

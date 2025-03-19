@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>MarketMind Stats</title>
+  <link rel="stylesheet" href="stats.css">
+</head>
+<body>
+  <div class="container">
+    <h1>MarketMind Statistics</h1>
+    
+    <div class="stats-grid">
+      <div class="stat-box">
+        <div class="stat-label">Viewed Listings</div>
+        <div id="viewedCount" class="stat-value">-</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">Found Items</div>
+        <div id="foundCount" class="stat-value">-</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">Marked Items</div>
+        <div id="markedCount" class="stat-value">-</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">Page Loads</div>
+        <div id="pageLoads" class="stat-value">-</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">Storage Operations</div>
+        <div id="storageOps" class="stat-value">-</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">Errors</div>
+        <div id="errors" class="stat-value">-</div>
+      </div>
+    </div>
+    
+    <div class="buttons">
+      <button id="refreshBtn">Refresh Data</button>
+      <button id="clearBtn">Clear Storage</button>
+    </div>
+    
+    <div id="log">
+      <div class="log-entry">Waiting for data...</div>
+    </div>
+  </div>
+  <script src="chart.js"></script>  <!-- local copy -->
+  <script src="stats.js"></script>
+</body>
+</html> 
