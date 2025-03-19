@@ -14,6 +14,9 @@ class MarketMind {
       lastUpdate: Date.now()
     }
     this.clickHandlers = new Map() // add this line to store click handlers
+    this.debounceTimeout = null
+    this.lastUpdate = 0
+    this.updateThrottle = 1000 // 1 second minimum between updates
     this.init()
   }
 
@@ -59,12 +62,7 @@ class MarketMind {
       this.observeListings()
       await this.markViewedListings()
       this.attachListeners()
-      
-      // Try multiple UI approaches
-      this.addIframePanel();       // Option 1: Completely isolated iframe
-      this.addIsolatedPanel();     // Option 2: Web Component with Shadow DOM
-      this.addDebugPanel();        // Option 3: Standard DOM element with monitoring
-      
+
       // Setup keyboard shortcut as fallback
       this.setupKeyboardShortcut();
       
@@ -81,16 +79,16 @@ class MarketMind {
 
   observeListings() {
     try {
-      const observer = new MutationObserver(async () => {
-        await this.markViewedListings()
-        this.updateDebugPanel()
+      const observer = new MutationObserver(() => {
+        // debounce the callback
+        if (this.debounceTimeout) clearTimeout(this.debounceTimeout)
+        this.debounceTimeout = setTimeout(() => this.markViewedListings(), 250)
       })
       
       observer.observe(document.body, { 
         childList: true, 
         subtree: true,
-        attributes: true, // catch more changes
-        attributeFilter: ['href'] // only href changes
+        attributes: false  // remove attribute watching since we don't need it
       })
       this.log('Observer attached')
     } catch (err) {
@@ -111,36 +109,28 @@ class MarketMind {
         if (!id) continue
         
         if (this.viewedListings.has(id)) {
-          listing.classList.add('mm-viewed')
-          markedCount++
+          if (!listing.classList.contains('mm-viewed')) {
+            listing.classList.add('mm-viewed')
+            markedCount++
+          }
         }
         
-        // Create a new click handler for each listing
-        const clickHandler = (e) => {
-          this.log(`Listing clicked: ${id} - ${listing.href}`)
-          // Use setTimeout to ensure the handler runs after the click is processed
-          setTimeout(() => this.markAsViewed(id, listing), 0)
+        // Only add handlers if they don't exist
+        if (!listing.dataset.mmHandled) {
+          const clickHandler = (e) => {
+            this.log(`Listing clicked: ${id}`)
+            setTimeout(() => this.markAsViewed(id, listing), 0)
+          }
+          
+          this.setClickHandlerFor(id, clickHandler)
+          listing.addEventListener('click', clickHandler)
+          listing.addEventListener('auxclick', clickHandler)
+          listing.dataset.mmHandled = 'true'
         }
-        
-        // Remove existing listeners using listing's dataset
-        if (listing.dataset.mmHandled) {
-          this.log(`Removing existing handlers for ${id}`)
-          listing.removeEventListener('click', this.getClickHandlerFor(id))
-          listing.removeEventListener('auxclick', this.getClickHandlerFor(id))
-        }
-        
-        // Store handler reference in a map for later removal
-        this.setClickHandlerFor(id, clickHandler)
-        
-        // Add the handlers
-        listing.addEventListener('click', clickHandler)
-        listing.addEventListener('auxclick', clickHandler) // middle click
-        
-        // Mark as handled
-        listing.dataset.mmHandled = 'true'
       }
+      
       this.stats.itemsMarked = markedCount
-      this.updateStats()
+      this.throttledUpdateStats()
     } catch (err) {
       this.stats.errors++
       this.log('Mark listings error:', err)
@@ -226,7 +216,12 @@ class MarketMind {
       action: 'updateStats', 
       stats: this.stats,
       viewedCount: this.viewedListings.size
-    }).catch(err => this.log('Stats update error:', err))
+    }).catch(err => {
+      // Only log unique errors
+      if (!err.message.includes('message channel closed')) {
+        this.log('Stats update error:', err)
+      }
+    })
   }
 
   addIframePanel() {
@@ -411,7 +406,7 @@ class MarketMind {
         this.openStatsPage();
       }
     });
-    this.log('Keyboard shortcut registered: Alt+Shift+M');
+    this.log('Open-Stats-Page Keyboard shortcut registered: Alt+Shift+M');
   }
 
   setClickHandlerFor(id, handler) {
@@ -420,6 +415,15 @@ class MarketMind {
 
   getClickHandlerFor(id) {
     return this.clickHandlers.get(id)
+  }
+
+  // Add throttled stats update
+  throttledUpdateStats() {
+    const now = Date.now()
+    if (now - this.lastUpdate >= this.updateThrottle) {
+      this.updateStats()
+      this.lastUpdate = now
+    }
   }
 }
 
